@@ -91,7 +91,20 @@ export default class SlimeMoldModel extends Model {
             // and add some pheromone to the turtle's patch
             turtle.forward(0.3)
             turtle.patch.pheromone += 10
+
+            
         })
+
+         // Periodic Reversal
+      	if (turtle.steps < 100) {
+            turtle.forward(0.3)
+            steps++
+          } else {
+            turtle.forward(0.3)
+            turtle.left(180)
+            steps=0
+          }
+          })
 
         // This part is new. patches.diffuse() causes each patch to give
         // some of its pheromone to its neighbors. Try changing the

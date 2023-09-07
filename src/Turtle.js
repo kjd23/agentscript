@@ -27,6 +27,7 @@ class Turtle {
         this.x = 0
         this.y = 0
         this.agentSet.setDefault('z', null)
+        this.steps = 0
     }
 
     /**
