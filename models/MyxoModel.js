@@ -1,28 +1,3 @@
-// 10/26 Wiggle and Restricted angle
-
-
-// Welcome to the model editor! It is similar to the tutorial code blocks
-// you saw before, but more flexible--everything can be customized here.
-// I'll walk you through it in these comments.
-// 
-
-// 
-// The first thing to notice is that there are two tabs up top:
-// the model tab, and the view tab. The model tab is where you write
-// code describing agent behavior, just like before.
-// 
-// The view tab is totally new. That's where you customize the size of
-// the world, and how agents and patches are drawn to the screen.
-// 
-
-// 
-// The SlimeMoldModel below is based on the code we wrote in the tutorial,
-// with two extra things added:
-// 
-//  1) turtles now intentionally move toward patches with more pheromone
-//  2) pheromone diffuses over time to neighboring patches
-// 
-
 export default class SlimeMoldModel extends Model {
     
     // 
@@ -56,16 +31,14 @@ export default class SlimeMoldModel extends Model {
     step() {        
         this.turtles.ask(turtle => {
 
-          let delta_t = .1
-          let speed = 7
-          let radius = 3
-          let coneAngle = 90
-          let wiggleAngle = 30 // This is an interesting variable to play with
+        let delta_t = .1
+        let speed = 7
+        let radius = 3
+        let coneAngle = 90
+        let wiggleAngle = 30 // This is an interesting variable to play with
+        let turtles_ahead = this.turtles.inRadius(turtle, radius, true)
 
-          //const agents = turtle.turtles.inPatchRect(turtle, radius, radius, true)
-          let turtles_ahead = this.turtles.inCone(turtle, radius, coneAngle).length
-          let agents = this.turtles.inPatchRect(turtle, radius, radius, true)
-          let turtles_behind = agents.inCone(turtle, radius, coneAngle, turtle.heading - 180, false).length
+        aligned_turtles = turtlesAlignedAhead(turtle.)
 
           // Reversal Rate lambda
 		  let lambda_0 = 1/7
@@ -133,7 +106,29 @@ export default class SlimeMoldModel extends Model {
         // Evaporate the pheromone over time
         this.patches.ask(patch => {
             patch.pheromone *= 0.1
-        })           
+        })             
+    }
+    // turtles aligned
+    turtlesAlignedAhead(agent, agents, theta) {
+        const aligned_agents = agents
+        this.ask(a => {
+            if (abs(agent.heading - a.heading) <= theta) {
+                aligned_agents.push(a)
+            }
+        })
+        return aligned_agents
+    }
+
+    turtlesAlignedBehind(agent, agents, theta) {
+        const mod = util.mod
+        const aligned_agents = agents
+        this.ask(a => {
+            if (abs(mod(agent.heading + 180, 360) - a.heading) <= theta) {
+                aligned_agents.push(a)
+            }
+        })
+        return aligned_agents
     }
 
 }
+
