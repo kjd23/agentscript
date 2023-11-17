@@ -8,7 +8,7 @@ export default class SlimeMoldModel extends Model {
     setup() {
         // This line should look familiar. One important difference:
         // in the editor, you say "this.turtles" instead of "model.turtles"
-        this.turtles.create(10)
+        this.turtles.create(50)
         
         // The next line is what gives all patches a property called
         // "pheromone", equal to 0. We were doing this behind the scenes before.
@@ -19,7 +19,7 @@ export default class SlimeMoldModel extends Model {
             // Say something about the world here, and how you can mess
             // with it in the view tab
             let [x, y] = this.world.randomPoint()
-            turtle.setxy(x, 50)
+            turtle.setxy(x, util.randomFloat2(-0.5,0.5))
         
           turtle.heading = 90
         })
@@ -33,7 +33,7 @@ export default class SlimeMoldModel extends Model {
     step() {        
         this.turtles.ask(turtle => {
 
-        let delta_t = .05
+        let delta_t = .1
         let speed = 7
         let radius = 1 // change
         let wiggleAngle = 30 // This is an interesting variable to play with
@@ -63,7 +63,7 @@ export default class SlimeMoldModel extends Model {
           // Reversal Rate lambda
 		let lambda_0 = 1/7
         let lambda_c = 6 //change
-        let q = 6
+        let q = 3
         let u_c = 4 // change
         let lambda = lambda_0 + lambda_c * ((aligned_turtles_ahead.length^q) / (aligned_turtles_ahead.length^q + u_c^q))
 
