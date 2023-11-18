@@ -4,24 +4,30 @@ export default class SlimeMoldModel extends Model {
     // The setup function is like a "run once" block. It gets
     // executed only once, to setup the model.
     // 
-
+	turtlePositions = {}
+  
     setup() {
         // This line should look familiar. One important difference:
         // in the editor, you say "this.turtles" instead of "model.turtles"
-        this.turtles.create(50)
+      	let turtleNumber = 250
+      	this.turtleConstant = turtleNumber / 50
+        this.turtles.create(turtleNumber)
         
         // The next line is what gives all patches a property called
         // "pheromone", equal to 0. We were doing this behind the scenes before.
         this.patches.setDefault('pheromone', 0)
         
         // Give each turtle a random starting position
-        this.turtles.ask(turtle => {
+        this.turtles.ask((turtle,turtleIndex) => {
             // Say something about the world here, and how you can mess
             // with it in the view tab
             let [x, y] = this.world.randomPoint()
-            turtle.setxy(x, util.randomFloat2(-0.5,0.5))
-        
-          turtle.heading = 90
+            turtle.setxy(x, util.randomFloat2(-1,1))
+          
+			// Initialize turtlePositions object for each turtle
+            this.turtlePositions[turtleIndex] = [{ x: turtle.xcor, y: turtle.ycor }] // Store initial position        
+         
+          	turtle.heading = 90
         })
     }
     
@@ -31,15 +37,22 @@ export default class SlimeMoldModel extends Model {
     // 
   
     step() {        
-        this.turtles.ask(turtle => {
+        this.turtles.ask((turtle, turtleIndex) => {
 
-        let delta_t = .1
+		if (!this.turtlePositions[turtleIndex]) {
+                this.turtlePositions[turtleIndex] = [] // Initialize if not already
+            }
+
+            // Inside the step function, update turtle positions and store them
+            this.turtlePositions[turtleIndex].push({ x: turtle.xcor, y: turtle.ycor })
+        
+        // variables
+        let delta_t = .025
         let speed = 7
         let radius = 1 // change
         let wiggleAngle = 30 // This is an interesting variable to play with
         let turtles_in_radius = this.turtles.inRadius(turtle, radius, true)
         let theta = 89
-
 
 		const aligned_turtles_ahead = turtles_in_radius
         this.turtles.ask(a => {
@@ -64,7 +77,7 @@ export default class SlimeMoldModel extends Model {
 		let lambda_0 = 1/7
         let lambda_c = 6 //change
         let q = 3
-        let u_c = 4 // change
+        let u_c = 4 * this.turtleConstant // change
         let lambda = lambda_0 + lambda_c * ((aligned_turtles_ahead.length^q) / (aligned_turtles_ahead.length^q + u_c^q))
 
 		  // Reversal
@@ -128,7 +141,41 @@ export default class SlimeMoldModel extends Model {
             patch.pheromone *= 0.1
         })             
     }
+  getTurtlePositionData(turtle_index) {
+        return this.turtle_positions[turtle_index]
+    }
+    this.exportCSV()
+  exportCSV() {
+        const csvContent = []
+        csvContent.push(['TurtleIndex', 'Step', 'X', 'Y'])
 
+        Object.keys(this.turtlePositions).forEach(turtleIndex => {
+            const positions = this.turtlePositions[turtleIndex]
+            positions.forEach((pos, step) => {
+                csvContent.push([turtleIndex, step, pos.x, pos.y])
+            })
+        })
 
+        const csvString = csvContent.map(row => row.join(',')).join('\n')
+        this.downloadCSV(csvString, 'turtle_positions.csv')
+    }
+
+    downloadCSV(csvString, fileName) {
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' })
+        if (navigator.msSaveBlob) {
+            navigator.msSaveBlob(blob, fileName)
+        } else {
+            const link = document.createElement('a')
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob)
+                link.setAttribute('href', url)
+                link.setAttribute('download', fileName)
+                link.style.visibility = 'hidden'
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+            }
+        }
+    }
 }
 

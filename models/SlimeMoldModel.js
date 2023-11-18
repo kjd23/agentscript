@@ -13,8 +13,58 @@
 // the world, and how agents and patches are drawn to the screen.
 // 
 
-import Model from '../src/Model.js'
-import * as util from '../src/utils.js'
+// 
+// The SlimeMoldModel below is based on the code we wrote in the tutorial,
+// with two extra things added:
+// 
+//  1) turtles now intentionally move toward patches with more pheromone
+//  2) pheromone diffuses over time to neighboring patches
+// 
+
+export default class SlimeMoldModel extends Model {
+    
+    // 
+    // The setup function is like a "run once" block. It gets
+    // executed only once, to setup the model.
+    // 
+
+    setup() {
+        // This line should look familiar. One important difference:
+        // in the editor, you say "this.turtles" instead of "model.turtles"
+        this.turtles.create(50)
+        
+        // The next line is what gives all patches a property called
+        // "pheromone", equal to 0. We were doing this behind the scenes before.
+        this.patches.setDefault('pheromone', 0)
+        
+        // Give each turtle a random starting position
+        this.turtles.ask(turtle => {
+            // Say something about the world here, and how you can mess
+            // with it in the view tab
+            let [x, y] = this.world.randomPoint()
+            turtle.setxy(x, y)
+        })
+    }
+    
+    // 
+    // The step function is like a "run forever" block. It gets
+    // executed over and over again.
+    // 
+
+    // 
+// Welcome to the model editor! It is similar to the tutorial code blocks
+// you saw before, but more flexible--everything can be customized here.
+// I'll walk you through it in these comments.
+// 
+
+// 
+// The first thing to notice is that there are two tabs up top:
+// the model tab, and the view tab. The model tab is where you write
+// code describing agent behavior, just like before.
+// 
+// The view tab is totally new. That's where you customize the size of
+// the world, and how agents and patches are drawn to the screen.
+// 
 
 // 
 // The SlimeMoldModel below is based on the code we wrote in the tutorial,
@@ -34,7 +84,7 @@ export default class SlimeMoldModel extends Model {
     setup() {
         // This line should look familiar. One important difference:
         // in the editor, you say "this.turtles" instead of "model.turtles"
-        this.turtles.create(100)
+        this.turtles.create(50)
         
         // The next line is what gives all patches a property called
         // "pheromone", equal to 0. We were doing this behind the scenes before.
@@ -56,51 +106,67 @@ export default class SlimeMoldModel extends Model {
 
     step() {
         this.turtles.ask(turtle => {
-            let wiggleAngle = 30 // This is an interesting variable to play with
-            
-            // We look at three patches: directly ahead, ahead and to the right,
-            // and ahead and to the left of the turtle
-            let patchAhead = turtle.patchAhead(1)
-            let patchRight = turtle.patchRightAndAhead(wiggleAngle, 1)
-            let patchLeft = turtle.patchLeftAndAhead(wiggleAngle, 1)
-            
-            if (patchAhead && patchLeft && patchRight) {
-                // If the patch to the right has the most pheromone, we turn right
-                if (patchRight.pheromone > patchLeft.pheromone &&
-                    patchRight.pheromone > patchAhead.pheromone) {
-                    
-                    turtle.right(wiggleAngle) 
-                }
+            let radius = 20
+            let coneAngle = 180
+          let wiggleAngle = 30 // This is an interesting variable to play with
 
-                // If the patch to the left has the most pheromone, we turn left
-                if (patchLeft.pheromone > patchRight.pheromone &&
-                    patchLeft.pheromone > patchAhead.pheromone) {
-                    
-                    turtle.left(wiggleAngle)  
-                }
-                
-                // If the patch ahead has the most pheromone, we don't rotate at all
-            } 
+          //const agents = turtle.turtles.inPatchRect(turtle, radius, radius, true)
+          let turtles_ahead = this.turtles.inCone(turtle, radius, coneAngle).length
 
-            // If there's no patch to our right or left (because we're at the edge
-            // of the world) we turn around.
-            if (!patchRight) turtle.left(90)
-            if (!patchLeft) turtle.right(90)
+            const agents = this.turtles.inPatchRect(turtle, radius, radius, true)
+          let turtles_behind = agents.inCone(turtle, radius, coneAngle, turtle.heading - 180).length
+          // var turtles_ahead = turtles_in_radius.removeAll(turtles_behind)
 
-            // This last bit should look familiar. Move forward,
-            // and add some pheromone to the turtle's patch
-            // turtle.forward(0.3)
-            // turtle.patch.pheromone += 10
+          // We look at three patches: directly ahead, ahead and to the right,
+          // and ahead and to the left of the turtle
+          let patchAhead = turtle.patchAhead(1)
+          let patchRight = turtle.patchRightAndAhead(wiggleAngle, 1)
+          let patchLeft = turtle.patchLeftAndAhead(wiggleAngle, 1)
+          
+          if (patchAhead && patchLeft && patchRight) {
+              // If the patch to the right has the most pheromone, we turn right
+              if (patchRight.pheromone > patchLeft.pheromone &&
+                  patchRight.pheromone > patchAhead.pheromone) {
+                  
+                  turtle.right(wiggleAngle) 
+              }
 
-         // Periodic Reversal
-      	    if (turtle.steps < 100) {
-                turtle.forward(0.3)
-                turtle.steps++
-            } else {
-            turtle.forward(0.3)
-            turtle.left(180)
-            turtle.steps = 0
-            }
+              // If the patch to the left has the most pheromone, we turn left
+              if (patchLeft.pheromone > patchRight.pheromone &&
+                  patchLeft.pheromone > patchAhead.pheromone) {
+                  
+                  turtle.left(wiggleAngle)  
+              }
+              
+              // If the patch ahead has the most pheromone, we don't rotate at all
+          } 
+
+          // If there's no patch to our right or left (because we're at the edge
+          // of the world) we turn around.
+          if (!patchRight) turtle.left(90)
+          if (!patchLeft) turtle.right(90)
+
+          // Reverse direction if turtle is 180 degrees in front, with radnom reversal reversal
+          if (turtles_behind > 0) {var random_float = util.randomFloat(100.00)
+              if (random_float > 0) {
+                  turtle.left(180)
+              }
+          }
+
+          // Get density of turtles behind an individual turtle
+          // var behind_turtles = turtle.inCone(radius=10)
+          //if (behind_turtles.length > 0) {
+          //    turtle.left()
+
+          // Periodic Reversal note: change to probability
+            var random_float = util.randomFloat(100.00)
+          if (random_float < 0) {
+              turtle.left(180)
+          }
+          // This last bit should look familiar. Move forward,
+          // and add some pheromone to the turtle's patch
+          turtle.forward(0.5)
+        turtle.patch.pheromone += 0
         })
 
         // This part is new. patches.diffuse() causes each patch to give
@@ -119,4 +185,37 @@ export default class SlimeMoldModel extends Model {
 // 
 // You reached the end! Don't forget to check out the view tab if you
 // haven't already. Have fun modeling!
-// 
+
+
+
+
+
+
+
+this.turtles.ask(turtle => {
+        
+    let radius = 3
+    let coneAngle = 180
+    let wiggleAngle = 30 // This is an interesting variable to play with
+
+    //const agents = turtle.turtles.inPatchRect(turtle, radius, radius, true)
+    let turtles_ahead = this.turtles.inCone(turtle, radius, coneAngle).length
+
+      const agents = this.turtles.inPatchRect(turtle, radius, radius, true)
+    let turtles_behind = agents.inCone(turtle, radius, coneAngle, turtle.heading - 180).length
+    // var turtles_ahead = turtles_in_radius.removeAll(turtles_behind)
+
+    // Reversal Rate lambda
+    let lambda_0 = 1
+    let lambda_c = 1
+    let q = 3
+    let u_c = lambda_c / 2
+    let lambda = lambda_0 + lambda_c * turtles_behind.length^q / (turtles_behind.length^q + lambda_c^q)
+
+   // Modified rate considering costreaming
+    let lambda_s = 1
+    let u_s = lambda_s / 2
+    let p = 1
+    let modified_lambda = lambda - lambda_s * turtles_ahead.length^p / (turtles_ahead.length^p + u_s^p)
+    
+    

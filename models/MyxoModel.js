@@ -34,18 +34,19 @@ export default class SlimeMoldModel extends Model {
         let delta_t = .1
         let speed = 7
         let radius = 3
-        let coneAngle = 90
         let wiggleAngle = 30 // This is an interesting variable to play with
         let turtles_ahead = this.turtles.inRadius(turtle, radius, true)
+        let theta = 90
 
-        aligned_turtles = turtlesAlignedAhead(turtle.)
+        let aligned_turtles_ahead = turtlesAlignedAhead(turtle, turtles_ahead, theta)
+        let aligned_turtles_behind = turtlesAlignedBehind(turtle, turtles_ahead, theta)
 
           // Reversal Rate lambda
 		  let lambda_0 = 1/7
           let lambda_c = 2
           let q = 5.925
           let u_c = lambda_c / 2
-          let lambda = lambda_0 + lambda_c * turtles_ahead.length^q / (turtles_ahead.length^q + lambda_c^q)
+          let lambda = lambda_0 + lambda_c * aligned_turtles_ahead.length^q / (aligned_turtles_ahead.length^q + lambda_c^q)
 
 		  // Reversal
           var random_float = util.randomFloat(1)
@@ -56,7 +57,7 @@ export default class SlimeMoldModel extends Model {
           let lambda_s = 1
           let u_s = lambda_s / 2
           let p = 1
-          let modified_lambda = lambda - lambda_s * turtles_behind.length^p / (turtles_behind.length^p + u_s^p)
+          let modified_lambda = lambda - lambda_s * aligned_turtles_behind.length^p / (aligned_turtles_behind.length^p + u_s^p)
 
            // Random wiggle
            let sigma = 200
@@ -112,7 +113,7 @@ export default class SlimeMoldModel extends Model {
     turtlesAlignedAhead(agent, agents, theta) {
         const aligned_agents = agents
         this.ask(a => {
-            if (abs(agent.heading - a.heading) <= theta) {
+            if (Math.abs(agent.heading - a.heading) <= theta) {
                 aligned_agents.push(a)
             }
         })
@@ -123,7 +124,7 @@ export default class SlimeMoldModel extends Model {
         const mod = util.mod
         const aligned_agents = agents
         this.ask(a => {
-            if (abs(mod(agent.heading + 180, 360) - a.heading) <= theta) {
+            if (Math.abs(mod(agent.heading + 180, 360) - a.heading) <= theta) {
                 aligned_agents.push(a)
             }
         })

@@ -34,11 +34,11 @@ export default class SlimeMoldModel extends Model {
     setup() {
         // This line should look familiar. One important difference:
         // in the editor, you say "this.turtles" instead of "model.turtles"
-        this.turtles.create(3)
+        this.turtles.create(50)
         
         // The next line is what gives all patches a property called
         // "pheromone", equal to 0. We were doing this behind the scenes before.
-        this.patches.setDefault('pheromone', 0)
+        this.patches.setDefault('pheromone', 0.5)
         
         // Give each turtle a random starting position
         this.turtles.ask(turtle => {
@@ -82,11 +82,6 @@ export default class SlimeMoldModel extends Model {
           let p = 1
           let modified_lambda = lambda - lambda_s * turtles_behind.length^p / (turtles_behind.length^p + u_s^p)
           
-          var random_float = util.randomFloat(1)
-          if (random_float < lambda*delta_t) {
-              turtle.left(180)
-          }
-
           // We look at three patches: directly ahead, ahead and to the right,
           // and ahead and to the left of the turtle
           let patchAhead = turtle.patchAhead(1)
@@ -136,7 +131,7 @@ export default class SlimeMoldModel extends Model {
           // This last bit should look familiar. Move forward,
           // and add some pheromone to the turtle's patch
           turtle.forward(speed*delta_t)
-        turtle.patch.pheromone += 0
+        turtle.patch.pheromone += 0.01
         })
 
         // This part is new. patches.diffuse() causes each patch to give
@@ -151,3 +146,9 @@ export default class SlimeMoldModel extends Model {
     }
 
 }
+
+sigma=1
+a = sigma*delta_t
+
+var random_wiggle = util.randomFloat(-a,a)
+
