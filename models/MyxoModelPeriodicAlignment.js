@@ -171,9 +171,9 @@ export default class SlimeMoldModel extends Model {
  //       })             
     }
    // Function to log turtle positions
-   printPositions() {
+    printPositions() {
     return model.turtles.map(t => t.x)
-}
+    }
 
 }
 
