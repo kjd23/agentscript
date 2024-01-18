@@ -1,12 +1,13 @@
 export default class SlimeMoldModel extends Model {
-    
+  
     // 
     // The setup function is like a "run once" block. It gets
     // executed only once, to setup the model.
     // 
-	turtlePositions = {}
+	
   
     setup() {
+    this.turtlePositions = {}
     let turtleNumber = 250;
     this.radius = 1
     this.turtleConstant = turtleNumber / (40) / (1 * this.radius^2 * Math.PI)
@@ -39,17 +40,31 @@ export default class SlimeMoldModel extends Model {
     // The step function is like a "run forever" block. It gets
     // executed over and over again.
     // 
+
+  	// Adds a step counter to track how much time has passed
+  	constructor() {
+      super();
+      this.stepCount = 0; // Initialize step count
+      this.turtlePositions = {};
+    }
+
   
     step() {        
+
+        this.stepCount++; // Increment step count on each step
+        console.log(`Step count: ${this.stepCount}`); // Log step count to the console
+
+
+      	// change to every 1 min. to change data output
         this.turtles.ask((turtle, turtleIndex) => {
 
-		if (!this.turtlePositions[turtleIndex]) {
-                this.turtlePositions[turtleIndex] = [] // Initialize if not already
-            }
+		// if (!this.turtlePositions[turtleIndex]) {
+        //        this.turtlePositions[turtleIndex] = [] // Initialize if not already
+        //    }
 
         // Inside the step function, update turtle positions and store them
-		this.turtlePositions[turtleIndex].push({ x: turtle.xcor, y: turtle.ycor });
-        console.log(`Turtle ${turtleIndex} position: (${turtle.xcor}, ${turtle.ycor})`);  
+		this.turtlePositions[turtleIndex].push({ x: turtle.x, y: turtle.y});
+        console.log(`Turtle ${turtleIndex} position: (${turtle.x}, ${turtle.y})`);  
           
         // variables
         let delta_t = .025
@@ -57,7 +72,7 @@ export default class SlimeMoldModel extends Model {
         let radius = this.radius
         let wiggleAngle = 30
         let D = 0.1 // diffusion
-        let diff_flag = 0
+        let Diff_flag = 0
         let turtles_in_radius = this.turtles.inRadius(turtle, radius, true)
         let theta = 89
 
@@ -92,11 +107,11 @@ export default class SlimeMoldModel extends Model {
             turtle.refractoryPeriod = true;
             turtle.refractoryPeriodCount = 4; // Duration of refractory period
         }      
-		 // Modified rate considering costreaming
-        let lambda_s = 0
-        let u_s = lambda_s / 2
-        let p = 1
-        let modified_lambda = lambda - lambda_s * ((aligned_turtles_behind.length^p) / (aligned_turtles_behind.length^p + u_s^p))
+		// Modified rate considering costreaming
+        // let lambda_s = 0
+        // let u_s = lambda_s / 2
+        // let p = 1
+        // let modified_lambda = lambda - lambda_s * ((aligned_turtles_behind.length^p) / (aligned_turtles_behind.length^p + u_s^p))
           
         if (turtle.refractoryPeriod) {
             turtle.refractoryPeriodCount--;
@@ -141,22 +156,26 @@ export default class SlimeMoldModel extends Model {
         
           // This last bit should look familiar. Move forward,
           // and add some pheromone to the turtle's patch
-          turtle.forward(speed*delta_t)
-        turtle.patch.pheromone += 0
+          turtle.forward(speed*delta_t+Diff_flag*util.randomNormal(0,Math.sqrt(2*D*delta_t)))
+          turtle.patch.pheromone += 0
         })
 
         // This part is new. patches.diffuse() causes each patch to give
         // some of its pheromone to its neighbors. Try changing the
         // diffusion amount and see what happens.
-        this.patches.diffuse('pheromone', 0.5)
+//        this.patches.diffuse('pheromone', 0.5)
 
         // Evaporate the pheromone over time
-        this.patches.ask(patch => {
-            patch.pheromone *= 0.1
-        })             
+        //this.patches.ask(patch => {
+ //           patch.pheromone *= 0.1
+ //       })             
     }
-  getTurtlePositionData(turtleIndex) {
-        return this.turtlePositions[turtleIndex]
-    }
+   // Function to log turtle positions
+   printPositions() {
+    return model.turtles.map(t => t.x)
 }
+
+}
+
+
 
