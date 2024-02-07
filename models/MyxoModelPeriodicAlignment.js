@@ -170,6 +170,7 @@ export default class SlimeMoldModel extends Model {
  //           patch.pheromone *= 0.1
  //       })             
     }
+    
    // Function to log turtle positions
     printPositions() {
     return model.turtles.map(t => t.x)

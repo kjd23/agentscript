@@ -5,7 +5,7 @@
     <body>
         <script type="module">
             import * as util from '../src/utils.js'
-            import Model from '../models/MyxoModelPeriodicAlignment.js'
+            import Model from '../models/PheromoneModel.js'
     
             util.printToPage('Running for 500 steps.')
     
@@ -13,7 +13,7 @@
             await model.startup()
             model.setup()
     
-            util.repeat(500, model.step)
+            util.repeat(1, model.step)
     
             const sample = util.sampleModel(model)
     
